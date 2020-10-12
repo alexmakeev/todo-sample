@@ -1,6 +1,9 @@
 const Koa = require('koa')
 const consola = require('consola')
 const {Nuxt, Builder} = require('nuxt')
+const Router = require('koa-router');
+const api_router = require('./api');
+const createBodyParser = require('koa-bodyparser');
 
 const app = new Koa()
 
@@ -23,6 +26,12 @@ async function start() {
 		const builder = new Builder(nuxt)
 		await builder.build()
 	}
+
+	app.use(createBodyParser());
+
+	let router = new Router();
+	router.use('/api', api_router.routes());
+	app.use(router.routes());
 
 	app.use((ctx) => {
 		ctx.status = 200

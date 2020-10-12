@@ -1,12 +1,14 @@
 <template>
 	<div>
 		<div v-if="!is_loaded">Loading...</div>
-		<div v-else v-for="(item, item_i) of items" :key="item.id">
+		<div v-else v-for="(item, item_i) of items" :key="item._id">
 			<input
 				type="checkbox"
-				v-model="item.checked"/>
+				v-model="item.checked"
+				@change="saveItem(item_i)"
+			/>
 			<span :class="{'done': item.checked}">{{item.title}}</span>
-			<input type="text" v-model="item.title"/>
+			<input type="text" v-model="item.title" @input="saveItem(item_i)"/>
 			<button @click="items.splice(item_i, 1)">Delete</button>
 		</div>
 		<button @click="createItem()">Add</button>
@@ -26,31 +28,25 @@
 			}
 		},
 		async created() {
-			try {
-				let item_a = await this.createItem('a');
-				await this.createItem('b');
-				await this.createItem('c');
-				await this.createItem('d');
-				await this.createItem('e');
-				item_a.title = "sdfadsf"
-			} catch (err) {
-				console.error(err);
-			}
-
+			this.loadItems();
 		},
 		methods: {
 			async loadItems() {
 				this.is_loaded = false;
-				// this.items = await axios.get('/todo-items/get_all', {});
+				this.items = (await this.$axios.get('/api/getAll', {})).data;
 				this.is_loaded = true;
 			},
 			async createItem(title, spec) {
 				// let id = await axios.get('/todo-items/add', {});
-				let item = {id: Math.random(), checked: false, title: title, spec}
+				let item = (await this.$axios.put('/api/createOne', {})).data; //{id: Math.random(), checked: false, title: title, spec}
 				this.items.push(item);
 				return item;
+			},
+			async saveItem(item_i) {
+				let item = this.items[item_i];
+				let ret = (await this.$axios.post('/api/saveOne', {id: item._id, new_attrs: item})).data;
 			}
-		}
+		},
 	}
 </script>
 
