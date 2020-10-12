@@ -1,92 +1,61 @@
 <template>
-  <v-layout
-    column
-    justify-center
-    align-center
-  >
-    <v-flex
-      xs12
-      sm8
-      md6
-    >
-      <div class="text-center">
-        <logo />
-        <vuetify-logo />
-      </div>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>Vuetify is a progressive Material Design component framework for Vue.js. It was designed to empower developers to create amazing applications.</p>
-          <p>
-            For more information on Vuetify, check out the <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-            >
-              documentation
-            </a>.
-          </p>
-          <p>
-            If you have questions, please join the official <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              title="chat"
-            >
-              discord
-            </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              title="contribute"
-            >
-              issue board
-            </a>.
-          </p>
-          <p>Thank you for developing with Vuetify and I look forward to bringing more exciting features in the future.</p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3">
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-          >
-            Nuxt Documentation
-          </a>
-          <br>
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-flex>
-  </v-layout>
+	<div>
+		<div v-if="!is_loaded">Loading...</div>
+		<div v-else v-for="(item, item_i) of items" :key="item.id">
+			<input
+				type="checkbox"
+				v-model="item.checked"/>
+			<span :class="{'done': item.checked}">{{item.title}}</span>
+			<input type="text" v-model="item.title"/>
+			<button @click="items.splice(item_i, 1)">Delete</button>
+		</div>
+		<button @click="createItem()">Add</button>
+
+		Total undone: {{items.filter(it => !it.checked).length}}
+	</div>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
-import VuetifyLogo from '~/components/VuetifyLogo.vue'
+	// const axios = require('axios');
 
-export default {
-  components: {
-    Logo,
-    VuetifyLogo
-  }
-}
+	export default {
+		data: () => {
+			return {
+				items: [],
+				is_loaded: true
+			}
+		},
+		async created() {
+			try {
+				let item_a = await this.createItem('a');
+				await this.createItem('b');
+				await this.createItem('c');
+				await this.createItem('d');
+				await this.createItem('e');
+				item_a.title = "sdfadsf"
+			} catch (err) {
+				console.error(err);
+			}
+
+		},
+		methods: {
+			async loadItems() {
+				this.is_loaded = false;
+				// this.items = await axios.get('/todo-items/get_all', {});
+				this.is_loaded = true;
+			},
+			async createItem(title, spec) {
+				// let id = await axios.get('/todo-items/add', {});
+				let item = {id: Math.random(), checked: false, title: title, spec}
+				this.items.push(item);
+				return item;
+			}
+		}
+	}
 </script>
+
+<style scoped>
+	.done {
+		text-decoration: line-through;
+	}
+</style>
